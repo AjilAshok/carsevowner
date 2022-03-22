@@ -9,6 +9,8 @@ import 'package:get/get.dart';
 import 'package:get/get_state_manager/src/simple/get_state.dart';
 
 class Bottomnav extends StatelessWidget {
+  static var id;
+
   Bottomnav({Key? key}) : super(key: key);
 
   final page = [Homescreen(), Requestpage(), Billis(), Profile()];

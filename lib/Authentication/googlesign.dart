@@ -1,16 +1,20 @@
 import 'package:carsevowner/bottomnav/bottomnav.dart';
+import 'package:carsevowner/controller/login.dart';
 import 'package:carsevowner/registeration/registration.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class Googlesign extends StatelessWidget {
    Googlesign({Key? key}) : super(key: key);
-  final GoogleSignIn _googleSignIn=GoogleSignIn(scopes: ['email']);
+   final controler=Get.put(Logincontrol());
+  // final GoogleSignIn _googleSignIn=GoogleSignIn(scopes: ['email']);
+  // GoogleSignInAccount?  _user;
 
   @override
   Widget build(BuildContext context) {
-    GoogleSignInAccount? user=_googleSignIn.currentUser;
+    
     return SafeArea(
         child: Scaffold(
       backgroundColor: Color(0XFF3D433E),
@@ -36,8 +40,11 @@ class Googlesign extends StatelessWidget {
           ),
           InkWell(
             onTap: ()async{
-              await _googleSignIn.signIn();
-              Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Registrationpage()));
+            
+               controler.login(context);
+             
+
+     
             },
             child: Container(
               decoration: BoxDecoration(
@@ -68,23 +75,7 @@ class Googlesign extends StatelessWidget {
                   )
                 ],
               ),
-              // child: ElevatedButton(
-              //   style: ButtonStyle(
-              //     backgroundColor: MaterialStateProperty.all(Color(0xFF62A769)),
-              //   ),
-              //   onPressed: () {
-              //     // Navigator.push(
-              //     //     context,
-              //     //     MaterialPageRoute(
-              //     //       // builder: (context) => Trackpage(),
-              //     //     ));
-              //   },
-              //   child: Text(
-              //     "Sign with Google",
-              //     style: TextStyle(
-              //         color: Colors.black, fontSize: 20, letterSpacing: 1),
-              //   ),
-              // ),
+          
             ),
           ),
         ],

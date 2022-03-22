@@ -55,7 +55,7 @@ class Requestpage extends StatelessWidget {
                         Row(
                           children: [
                          
-                             Text("Conplaint",style: GoogleFonts.montserrat(color: Colors.black,fontSize: 22),),
+                             Text("Complaint",style: GoogleFonts.montserrat(color: Colors.black,fontSize: 22),),
                              SizedBox(
                                width: MediaQuery.of(context).size.width*0.32,
                              ),

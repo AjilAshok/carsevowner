@@ -1,15 +1,34 @@
+import 'package:carsevowner/Authentication/googlesign.dart';
+import 'package:carsevowner/controller/login.dart';
 import 'package:carsevowner/controller/ownerservice.dart';
+import 'package:carsevowner/registeration/registration.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:get/get_state_manager/src/simple/get_state.dart';
+import 'package:get/get.dart';
+
+import 'package:google_sign_in/google_sign_in.dart';
+
+
 
 bool isSwitched = true;
 
 class Profile extends StatelessWidget {
   Profile({Key? key}) : super(key: key);
+  final user=FirebaseAuth.instance.currentUser;
+  final control=Get.put(Logincontrol());
+  TextEditingController emailcontroller=TextEditingController();
+TextEditingController namecontroller=TextEditingController();
 
   @override
   Widget build(BuildContext context) {
+    TextEditingController phonecontrol=TextEditingController();
+
+    emailcontroller.text=control.user?.email??"";
+    namecontroller.text=control.user?.displayName??"";
+
+    
+
     return SafeArea(
         child: Scaffold(
       backgroundColor: Colors.black,
@@ -18,7 +37,18 @@ class Profile extends StatelessWidget {
         elevation: 0,
         actions: [
           IconButton(
-              onPressed: () {},
+              onPressed: ()async {
+                // control.logout();
+                
+               FirebaseAuth.instance.signOut();
+               GoogleSignIn().signOut();
+                //  Get.off(Googlesign());
+                // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Googlesign(),));
+                Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder:(context) => Googlesign(),), (route) => false);
+                
+             
+                
+              },
               icon: Icon(
                 Icons.logout_outlined,
                 color: Colors.black,
@@ -39,13 +69,16 @@ class Profile extends StatelessWidget {
               height: 100,
               width: 100,
               child: CircleAvatar(
-                backgroundImage: AssetImage("assets/default_profile.png"),
+                backgroundImage:
+                NetworkImage(control.user?.photoUrl??""),
+                //  AssetImage("assets/default_profile.png"),
               ),
             ),
             Padding(
               padding: const EdgeInsets.only(
                   top: 30, left: 10, right: 10, bottom: 10),
               child: TextFormField(
+                controller: namecontroller,
                 style: TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   hintText: "Name",
@@ -64,6 +97,7 @@ class Profile extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(10),
               child: TextFormField(
+                keyboardType: TextInputType.phone,
                 style: TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   hintText: "Phonenumber",
@@ -82,6 +116,7 @@ class Profile extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(10),
               child: TextFormField(
+                controller: emailcontroller,
                 style: TextStyle(color: Colors.white),
                 decoration: InputDecoration(
                   hintText: "Email",
@@ -125,7 +160,9 @@ class Profile extends StatelessWidget {
               color: Colors.white,
             ),
             Text(
-              "Account Details",
+              // control.googleaccount.value?.displayName??"",
+              "Account details",
+              
               style: TextStyle(color: Colors.white, fontSize: 25),
             ),
             Padding(
