@@ -5,9 +5,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_navigation/src/root/get_material_app.dart';
+import 'package:native_notify/native_notify.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  NativeNotify.initialize(472, 'qMMR6PMv5Lfht6dCRrmQzA', null);
   await Firebase.initializeApp();
 
   runApp(const MyApp());

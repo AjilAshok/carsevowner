@@ -1,11 +1,14 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:get/get.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'dart:io';
-import 'dart:math';
+
 // import 'package:flutter_document_picker/flutter_document_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:open_file/open_file.dart';
@@ -16,12 +19,23 @@ class Ownerservice extends GetxController {
   String? selected;
   File? selfile;
   String? name;
+  String pdfText = 'Select a proof';
+  String checkBoxText = 'Select any options!';
+  Color checkBoxTextColor = Colors.white;
+  String address = "Select the location";
+
+  String dropDownText = 'Type';
+  Color dropDownTextColor = Colors.white;
+
+  Color textColor = Colors.white;
 
   String? values;
   bool Enginework = false;
   bool Oilchange = false;
   bool breakdown = false;
   bool carwash = false;
+  double latitude=0;
+  double longitude=0;
   //
 
   int currentindex = 0;
@@ -29,16 +43,17 @@ class Ownerservice extends GetxController {
 
   bottomnavbar(index) {
     currentindex = index;
+
     update();
   }
 
-  map() {
+  map({required long, required lat, required title}) {
+//
+
     markers.add(Marker(
         markerId: MarkerId("id-1"),
-        position: LatLng(10.1004, 76.3570),
-        infoWindow: InfoWindow(
-            // title:address.value
-            )));
+        position: LatLng(lat, long),
+        infoWindow: InfoWindow(title: title)));
   }
 
   dropdowntype(value) {
@@ -59,7 +74,7 @@ class Ownerservice extends GetxController {
       case "Brekdown":
         breakdown = vallue;
         break;
-      case "Carwash":
+      case "Washing":
         carwash = vallue;
         break;
     }
@@ -80,6 +95,7 @@ class Ownerservice extends GetxController {
     selfile = File(path.toString());
     //  firebase_storage.UploadTask task =  uploadFile(file);
     fileupload(name);
+    update();
   }
 
   viewfile(PlatformFile file) {
@@ -90,6 +106,38 @@ class Ownerservice extends GetxController {
     if (selfile == null) return;
     final fileName = selfile!.path;
     task = Firebaseapi.uploadFile(selfile!, name);
+  }
+
+  pdfvalidate(Color color, String txt) {
+    pdfText = txt;
+    textColor = color;
+    update();
+  }
+
+  checkboxValidate(Color color, String text) {
+    checkBoxText = text;
+    checkBoxTextColor = color;
+    update();
+  }
+
+  dropdownValidate(String text, Color color) {
+    dropDownText = text;
+    dropDownTextColor = color;
+    update();
+  }
+
+  locationservies(LatLng) async {
+    latitude = LatLng.latitude;
+    longitude = LatLng.longitude;
+    List<Placemark> placemark =
+        await placemarkFromCoordinates(latitude, longitude);
+    Placemark marker = placemark[0];
+    address = '${marker.subLocality},${marker.locality},${marker.country}';
+
+    update();
+    print(address);
+    print(latitude);
+    print(longitude);
   }
 }
 

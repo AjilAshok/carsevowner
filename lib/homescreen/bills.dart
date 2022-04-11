@@ -8,6 +8,7 @@ class Billis extends StatelessWidget {
   Widget build(BuildContext context) {
     return SafeArea(child: Scaffold(
       appBar: AppBar(
+         automaticallyImplyLeading: false,
         backgroundColor: Color(0XFF738878),
         elevation: 0,
         title:Text("Bills",style: TextStyle(fontSize: 25,letterSpacing: 1),) ,

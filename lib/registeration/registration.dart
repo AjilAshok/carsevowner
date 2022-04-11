@@ -18,23 +18,36 @@ import 'package:get/get_state_manager/src/simple/get_state.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:intl/intl.dart';
+import 'package:native_notify/native_notify.dart';
 import 'package:open_file/open_file.dart';
 
 class Registrationpage extends StatelessWidget {
   Registrationpage({Key? key}) : super(key: key);
+
   final _formKey = GlobalKey<FormState>();
+
   String lat = "10.1004";
+
   String log = " 76.3570";
+
   bool? register = false;
+
   final types = ["Bike", "Car"];
+
   TextEditingController shopname = TextEditingController();
+
   TextEditingController phonenumber = TextEditingController();
+
   TextEditingController ownername = TextEditingController();
+
   TextEditingController email = TextEditingController();
+
   final control = Get.put(Logincontrol());
+
   final ownercontrol = Get.put(Ownerservice());
 
-  String pdfName = "Shop license proof";
+  // String pdfName = "Shop license proof";
 
   @override
   Widget build(BuildContext context) {
@@ -103,8 +116,8 @@ class Registrationpage extends StatelessWidget {
                   validator: ((value) {
                     if (value!.isEmpty || value == null) {
                       return "Enter a valid number";
-                    // }else if(value != 10){
-                    //      return '';
+                      // }else if(value != 10){
+                      //      return '';
                     }
                   }),
                   keyboardType: TextInputType.phone,
@@ -187,9 +200,13 @@ class Registrationpage extends StatelessWidget {
                         border: Border.all(color: Color(0xFF008000))),
                     child: Padding(
                       padding: const EdgeInsets.only(top: 15, left: 12),
-                      child: Text(
-                        "Location",
-                        style: TextStyle(color: Colors.white),
+                      child: GetBuilder<Ownerservice>(
+                        builder: (controller) => 
+                         Text(
+                           controller.address,
+                          
+                          style: TextStyle(color: Colors.white),
+                        ),
                       ),
                     ),
                   ),
@@ -213,8 +230,8 @@ class Registrationpage extends StatelessWidget {
                           hint: Padding(
                             padding: const EdgeInsets.all(10.0),
                             child: Text(
-                              "Type",
-                              style: TextStyle(color: Colors.white),
+                              controller.dropDownText,
+                              style: TextStyle(color: controller.dropDownTextColor),
                             ),
                           ),
                           isExpanded: true,
@@ -247,17 +264,25 @@ class Registrationpage extends StatelessWidget {
                   onTap: () {
                     ownercontrol.pickfiles();
                   },
-                  child: Container(
-                    height: 60,
-                    width: double.infinity,
-                    // margin: const EdgeInsets.only(right: 20.0, left: 20),
-                    padding: const EdgeInsets.all(12.0),
-                    decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Color(0xFF008000))),
-                    child: Text(
-                      pdfName,
-                      style: TextStyle(color: Colors.white),
+                  child: GetBuilder<Ownerservice>(
+                    builder: (controller) => Container(
+                      height: 60,
+                      width: double.infinity,
+                      // margin: const EdgeInsets.only(right: 20.0, left: 20),
+                      padding: const EdgeInsets.all(12.0),
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(color: Color(0xFF008000))),
+                      child: controller.name == null
+                          ? Text(
+                              controller.pdfText,
+                              style: TextStyle(color: controller.textColor),
+                            )
+                          : Text(
+                              controller.name.toString(),
+                              //
+                              style: TextStyle(color: Colors.white),
+                            ),
                     ),
                   ),
                 ),
@@ -295,12 +320,24 @@ class Registrationpage extends StatelessWidget {
                       child: checkbox(
                           "Brekdown", controller.breakdown, controller),
                     ),
-                    checkbox("Carwash", controller.carwash, controller),
+                    checkbox("Washing", controller.carwash, controller),
                   ],
                 ),
               ),
               SizedBox(
                 height: 20,
+              ),
+              GetBuilder<Ownerservice>(builder: (controller) {
+                return Center(
+                  child: Text(
+                    controller.checkBoxText,
+                    style: TextStyle(
+                        color: controller.checkBoxTextColor, fontSize: 15),
+                  ),
+                );
+              }),
+              SizedBox(
+                height: 10,
               ),
               Center(
                   child: SizedBox(
@@ -311,9 +348,24 @@ class Registrationpage extends StatelessWidget {
                     backgroundColor:
                         MaterialStateProperty.all(Color(0xFF62A769)),
                   ),
-                  onPressed: ()async {
+                  onPressed: () async {
+                    final controller = Get.find<Ownerservice>();
+                    if (controller.name == null) {
+                      controller.pdfvalidate(
+                          Colors.red, 'Please select a proof');
+                    }
+
+                    if (checkBoxList.isEmpty) {
+                      controller.checkboxValidate(Colors.red, 'Please select ');
+                    }
+
+                    if (controller.values == null) {
+                      controller.dropdownValidate('Select Type', Colors.red);
+                    }
+
                     if (_formKey.currentState!.validate()) {
-                     await addowner();
+                      await addowner();
+                      yourLoginFunction();
 
                       if (register == false) {
                         Navigator.push(
@@ -341,7 +393,7 @@ class Registrationpage extends StatelessWidget {
     ));
   }
 
-      List<String> a = [];
+  List<String> checkBoxList = [];
 
   Widget checkbox(String title, bool boolValue, Ownerservice control) {
     return Padding(
@@ -357,14 +409,13 @@ class Registrationpage extends StatelessWidget {
             activeColor: Color(0xFF008000),
             value: boolValue,
             onChanged: (value) {
-          
-              if ( value==true) {
-                a.add(title);
-              }else{
-                a.remove(title);
+              if (value == true) {
+                checkBoxList.add(title);
+              } else {
+                checkBoxList.remove(title);
               }
               control.chekbox(title, value!);
-              print(a);
+              // print(a);
             },
           )
         ],
@@ -379,18 +430,26 @@ class Registrationpage extends StatelessWidget {
     return usercollection
         .doc(user!.uid.toString())
         .set({
-          "ownerId":user.uid,
+          "ownerId": user.uid,
           "showname": shopname.text,
           "phonenumber": phonenumber.text,
           "ownername": ownername.text,
           "email": email.text,
-          "location": "$lat,$log",
+          "location": ownercontrol.address,
           "type": ownercontrol.values.toString(),
           "proof": ownercontrol.name,
-          "chekbox": a,
+          "chekbox": checkBoxList,
           "register": register,
+          "latitude":ownercontrol.latitude,
+          "longitude":ownercontrol.longitude,
+           "date":DateFormat('dd-MM-yyyy').format(DateTime.now())
         })
         .then((value) => print("Owneradded"))
         .onError((error, stackTrace) => print(error));
   }
+   void yourLoginFunction() {
+    
+    NativeNotify.registerIndieID('4');
+}
+
 }

@@ -33,6 +33,7 @@ TextEditingController namecontroller=TextEditingController();
         child: Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
+         automaticallyImplyLeading: false,
         backgroundColor: Color(0XFF738878),
         elevation: 0,
         actions: [
