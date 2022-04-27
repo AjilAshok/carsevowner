@@ -1,12 +1,13 @@
 import 'package:carsevowner/controller/ownerservice.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get/get_state_manager/src/simple/get_state.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:intl/intl.dart';
 class Trackpage extends StatelessWidget {
-   Trackpage({ Key? key,required this.username,required this.latitude,required this.logitude,required this.index,required this.currentuserid }) : super(key: key);
+   Trackpage({ Key? key,required this.username,required this.latitude,required this.logitude,required this.index,required this.currentuserid,required this.docid }) : super(key: key);
   TextEditingController workdone=TextEditingController();
    TextEditingController sparechange=TextEditingController();
     TextEditingController amount=TextEditingController();
@@ -17,6 +18,7 @@ class Trackpage extends StatelessWidget {
     var logitude;
     int index;
     var currentuserid;
+    var docid;
     
 
   @override
@@ -167,6 +169,7 @@ class Trackpage extends StatelessWidget {
                                   onPressed: ()async {
                                     if(_formKey.currentState!.validate()){
                                       await addamount();
+                                      // Navigator.pop(context);
 
                                     }
                                   //  Navigator.push(context,MaterialPageRoute(builder: (context) => Trackpage(),));
@@ -191,18 +194,28 @@ class Trackpage extends StatelessWidget {
     ));
   }
   addamount()async{
+    final owernerid=FirebaseAuth.instance.currentUser!.uid;
     CollectionReference amoutform =
         FirebaseFirestore.instance.collection("Amountform");
         return amoutform.add({
           "username":username,
           "workdone":workdone.text,
           "sparechange":sparechange.text,
-          "date":DateFormat('dd-MM-yyyy').format( DateTime.now()),
+          "date":DateTime.now().millisecondsSinceEpoch,
           "amount":amount.text,
           "currenuserid":currentuserid,
+          "ownerid":owernerid,
 
 
-        }).then((value) => print("amountform"));
+        }).then((value){
+          workdone.clear();
+          sparechange.clear();
+          amount.clear();
+
+        });
+    
+
+        // FirebaseFirestore.instance.collection("Accepted").up
 
   }
  

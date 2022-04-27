@@ -2,6 +2,7 @@ import 'package:carsevowner/Authentication/googlesign.dart';
 import 'package:carsevowner/controller/login.dart';
 import 'package:carsevowner/controller/ownerservice.dart';
 import 'package:carsevowner/registeration/registration.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -9,46 +10,77 @@ import 'package:get/get.dart';
 
 import 'package:google_sign_in/google_sign_in.dart';
 
-
-
 bool isSwitched = true;
 
 class Profile extends StatelessWidget {
   Profile({Key? key}) : super(key: key);
-  final user=FirebaseAuth.instance.currentUser;
-  final control=Get.put(Logincontrol());
-  TextEditingController emailcontroller=TextEditingController();
-TextEditingController namecontroller=TextEditingController();
+  final user = FirebaseAuth.instance.currentUser;
+  final control = Get.put(Logincontrol());
+  final Ownercontroler=Get.put(Ownerservice());
+  
+
+  TextEditingController emailcontroller = TextEditingController();
+  TextEditingController namecontroller = TextEditingController();
+  TextEditingController phonecontroller = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
-    TextEditingController phonecontrol=TextEditingController();
 
-    emailcontroller.text=control.user?.email??"";
-    namecontroller.text=control.user?.displayName??"";
-
-    
+    final user = FirebaseAuth.instance.currentUser;
+    // details();
+   
+    emailcontroller.text = user?.email ?? "";
+    namecontroller.text = user?.displayName ?? "";
+    // phonecontroller.text=Ownercontroler.phonenmber;
+    final ownercontroller = Get.put(Ownerservice());
 
     return SafeArea(
         child: Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-         automaticallyImplyLeading: false,
+        automaticallyImplyLeading: false,
         backgroundColor: Color(0XFF738878),
         elevation: 0,
         actions: [
           IconButton(
-              onPressed: ()async {
+              onPressed: () async {
+                showDialog(
+                    context: context,
+                    builder: (context) {
+                      return AlertDialog(
+                          backgroundColor: Colors.black,
+                          title: Text("Are you sure",
+                              style: TextStyle(color: Colors.white)),
+                          // content: Text("This is my message."),
+                          actions: [
+                            TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                child: Text(
+                                  "No",
+                                  style: TextStyle(
+                                      color: Color.fromARGB(255, 66, 219, 102)),
+                                )),
+                            TextButton(
+                                onPressed: () {
+                                  FirebaseAuth.instance.signOut();
+                                  GoogleSignIn().signOut();
+                                  ownercontroller.currentindex = 0;
+                                  Get.offAll(Googlesign());
+                                },
+                                child: Text(
+                                  "Yes",
+                                  style: TextStyle(
+                                      color: Color.fromARGB(255, 66, 219, 102)),
+                                ))
+                          ]);
+                    });
                 // control.logout();
-                
-               FirebaseAuth.instance.signOut();
-               GoogleSignIn().signOut();
+
                 //  Get.off(Googlesign());
                 // Navigator.pushReplacement(context, MaterialPageRoute(builder: (context) => Googlesign(),));
-                Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder:(context) => Googlesign(),), (route) => false);
-                
-             
-                
+                // Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder:(context) => Googlesign(),), (route) => false);
               },
               icon: Icon(
                 Icons.logout_outlined,
@@ -70,8 +102,7 @@ TextEditingController namecontroller=TextEditingController();
               height: 100,
               width: 100,
               child: CircleAvatar(
-                backgroundImage:
-                NetworkImage(control.user?.photoUrl??""),
+                backgroundImage: NetworkImage(user!.photoURL ?? "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460__480.png"),
                 //  AssetImage("assets/default_profile.png"),
               ),
             ),
@@ -98,6 +129,7 @@ TextEditingController namecontroller=TextEditingController();
             Padding(
               padding: const EdgeInsets.all(10),
               child: TextFormField(
+                controller: phonecontroller,
                 keyboardType: TextInputType.phone,
                 style: TextStyle(color: Colors.white),
                 decoration: InputDecoration(
@@ -141,9 +173,8 @@ TextEditingController namecontroller=TextEditingController();
                     "Online / Offline",
                     style: TextStyle(color: Colors.white),
                   ),
-                  SizedBox(
-                    width: MediaQuery.of(context).size.width * 0.53,
-                  ),
+                  Spacer(),
+                 
                   GetBuilder<Ownerservice>(
                     init: Ownerservice(),
                     builder: (controller) => Switch(
@@ -163,7 +194,7 @@ TextEditingController namecontroller=TextEditingController();
             Text(
               // control.googleaccount.value?.displayName??"",
               "Account details",
-              
+
               style: TextStyle(color: Colors.white, fontSize: 25),
             ),
             Padding(

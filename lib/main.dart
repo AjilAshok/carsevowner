@@ -21,6 +21,8 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    print(DateTime.now().millisecondsSinceEpoch);
+    
     final user = FirebaseAuth.instance.currentUser;
 
     return GetMaterialApp(
@@ -29,7 +31,7 @@ class MyApp extends StatelessWidget {
         unselectedWidgetColor: Color(0xFF008000),
         primarySwatch: Colors.blue,
       ),
-      home: Splashscreen(),
+      home:Splashscreen() 
     );
   }
 }

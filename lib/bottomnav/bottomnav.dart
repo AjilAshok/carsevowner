@@ -3,22 +3,25 @@ import 'package:carsevowner/homescreen/bills.dart';
 import 'package:carsevowner/homescreen/homescreen.dart';
 import 'package:carsevowner/homescreen/profile.dart';
 import 'package:carsevowner/homescreen/requestpage.dart';
+import 'package:carsevowner/report/reportpage.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:get/get.dart';
 import 'package:get/get_state_manager/src/simple/get_state.dart';
+import 'package:intl/intl.dart';
 
 class Bottomnav extends StatelessWidget {
   static var id;
 
   Bottomnav({Key? key}) : super(key: key);
 
-  final page = [Homescreen(), Requestpage(), Billis(), Profile()];
+  final page = [Homescreen(), Requestpage(), Billis(), Report_page(), Profile()];
 
   // int currentindex = 0;
 
   @override
   Widget build(BuildContext context) {
+  
     Get.put(Ownerservice());
     return SafeArea(
         child: GetBuilder<Ownerservice>(
@@ -50,10 +53,15 @@ class Bottomnav extends StatelessWidget {
                 label: "Bills",
                 icon: Icon(FontAwesomeIcons.rupeeSign),
               ),
+               BottomNavigationBarItem(
+                label: "Report",
+                icon: Icon(FontAwesomeIcons.solidCopy),
+              ),
               BottomNavigationBarItem(
                 label: "Profile",
                 icon: Icon(FontAwesomeIcons.userAlt),
-              )
+              ),
+              
             ]),
       ),
     ));

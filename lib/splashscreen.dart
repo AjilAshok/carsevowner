@@ -13,12 +13,16 @@ import 'package:google_fonts/google_fonts.dart';
 
 class Splashscreen extends StatelessWidget {
   Splashscreen({Key? key}) : super(key: key);
-  final auth = FirebaseAuth.instance.currentUser;
+ 
 
   @override
   Widget build(BuildContext context) {
-    //  print(auth);
 
+      final user = FirebaseAuth.instance.currentUser;
+
+
+      try {
+        
     return AnimatedSplashScreen(
       backgroundColor: Color(0XFF3D433E),
       splash: Column(
@@ -42,13 +46,19 @@ class Splashscreen extends StatelessWidget {
               style: GoogleFonts.rye(fontSize: 30, color: Colors.white))
         ],
       ),
-      nextScreen: auth == null ? Googlesign() : Bottomnav(),
+      nextScreen: user == null ? Googlesign() :Bottomnav(),
       duration: 3000,
       splashTransition: SplashTransition.rotationTransition,
       // pageTransitionType:,
       animationDuration: Duration(seconds: 1),
       splashIconSize: 350,
     );
+      } catch (e) {
+        print('mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm');
+        print(e);
+        print('e');
+      }
+return Container();
   }
 
   //

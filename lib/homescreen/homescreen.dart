@@ -1,17 +1,28 @@
 import 'package:carsevowner/controller/ownerservice.dart';
 import 'package:carsevowner/homescreen/widgets/Track.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get_core/src/get_main.dart';
+import 'package:get/get_instance/get_instance.dart';
 import 'package:get/get_navigation/get_navigation.dart';
 import 'package:get/get_state_manager/src/simple/get_state.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:native_notify/native_notify.dart';
 
 class Homescreen extends StatelessWidget {
-  const Homescreen({Key? key}) : super(key: key);
+  Homescreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    yourLoginFunction();
+    
+    final controler = Get.put(Ownerservice());
+    // controler.addres();
+    final user=FirebaseAuth.instance.currentUser;
+    print(user!.uid);
+
     return SafeArea(
         child: Scaffold(
       appBar: AppBar(
@@ -33,10 +44,10 @@ class Homescreen extends StatelessWidget {
                   children: [
                     Icon(Icons.location_on),
                     SizedBox(width: 5),
-                    controller.address == null
-                        ? Text("Current location",
+                    controller.location == null
+                        ? Text(controler.address,
                             style: GoogleFonts.montserrat(color: Colors.black))
-                        : Text(controller.address,
+                        : Text(controller.location.toString(),
                             style: GoogleFonts.montserrat(color: Colors.black))
                   ],
                 ),
@@ -45,104 +56,124 @@ class Homescreen extends StatelessWidget {
             SizedBox(
               // height:MediaQuery.of(context).size.height*1.5,
               child: StreamBuilder<QuerySnapshot>(
-                stream:  FirebaseFirestore.instance
-              .collection('Accepted').snapshots(),
-                builder: (context,AsyncSnapshot<QuerySnapshot> snapshot) {
-                  if (snapshot.connectionState==ConnectionState.waiting) {
-                    return Center(
-                      child: CircularProgressIndicator(),
-                    );
-                   
-            
+                  stream: FirebaseFirestore.instance
+                      .collection('Accepted').where("ownerid", isEqualTo:user.uid)
+                      .snapshots(),
+                  builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+
                     
-                  }if (snapshot.data!.docs.isEmpty) {
-                    return Center(
-                      child: Text("No Result"),
-                    );
-                    
-                  }
-                  return ListView.builder(
-                    physics: NeverScrollableScrollPhysics(),
-                    shrinkWrap: true,
-                    scrollDirection: Axis.vertical,
-                    itemBuilder: (context, index) {
-                      final detaisl=snapshot.data!.docs[index];
-                      return Container(
-                          margin: EdgeInsets.all(15),
-                          height: 220,
-                          decoration: BoxDecoration(
-                              color: Color(0XFF3D433E),
-                              borderRadius: BorderRadius.circular(20)),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Padding(
-                                padding: const EdgeInsets.all(10.0),
-                                child: Text(
-                                  detaisl['nameuser'],
-                                  style:
-                                      TextStyle(color: Colors.white, fontSize: 20),
-                                ),
-                              ),
-                              Padding(
-                                padding: const EdgeInsets.all(9.0),
-                                child: Text(
-                                   detaisl['complaint'],
-                                  style:
-                                      TextStyle(color: Colors.white, fontSize: 20),
-                                ),
-                              ),
-                              SizedBox(
-                                height: 20,
-                              ),
-                               Padding(
-                                padding: const EdgeInsets.only(left: 10,right: 10,),
-                                child: Text(
-                                  detaisl['works'],
-                                  style:
-                                      TextStyle(color: Colors.white, fontSize: 20),
-                                ),
-                              ),
-                                SizedBox(
-                                height: 20,
-                              ),
-                              Center(
-                                child: SizedBox(
-                                  width: 180,
-                                  height: 50,
-                                  child: ElevatedButton(
-                                    style: ButtonStyle(
-                                      backgroundColor: MaterialStateProperty.all(
-                                          Color(0xFF62A769)),
-                                    ),
-                                    onPressed: () {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                            builder: (context) => Trackpage(username: detaisl['nameuser'] ,latitude: detaisl['latitude'],logitude: detaisl['longitude'],index: index,currentuserid:detaisl['currentuserid'] ,),
-                                          ));
-                                    },
-                                    child: Text(
-                                      "Track",
-                                      style: TextStyle(
-                                          color: Colors.black,
-                                          fontSize: 20,
-                                          letterSpacing: 1),
-                                    ),
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: CircularProgressIndicator(),
+                      );
+                    }
+                    if (snapshot.data!.docs.isEmpty) {
+                      return Center(
+                        child: Text("No Result"),
+                      );
+                    }
+                    return ListView.builder(
+                      physics: NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      scrollDirection: Axis.vertical,
+                      itemBuilder: (context, index) {
+                        final detaisl = snapshot.data!.docs[index];
+                      // print(detaisl.id);
+                        return Container(
+                            margin: EdgeInsets.all(15),
+                            height: 220,
+                            decoration: BoxDecoration(
+                                color: Color(0XFF3D433E),
+                                borderRadius: BorderRadius.circular(20)),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Padding(
+                                  padding: const EdgeInsets.all(10.0),
+                                  child: Text(
+                                    detaisl['nameuser'],
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 20),
                                   ),
                                 ),
-                              )
-                            ],
-                          ));
-                    },
-                    itemCount: snapshot.data!.docs.length,
-                  );
-                }
-              ),
+                                Padding(
+                                  padding: const EdgeInsets.all(9.0),
+                                  child: Text(
+                                    detaisl['complaint'],
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 20),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 20,
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    left: 10,
+                                    right: 10,
+                                  ),
+                                  child: Text(
+                                    detaisl['works'],
+                                    style: TextStyle(
+                                        color: Colors.white, fontSize: 20),
+                                  ),
+                                ),
+                                SizedBox(
+                                  height: 20,
+                                ),
+                                Center(
+                                  child: SizedBox(
+                                    width: 180,
+                                    height: 50,
+                                    child: ElevatedButton(
+                                      style: ButtonStyle(
+                                        backgroundColor:
+                                            MaterialStateProperty.all(
+                                                Color(0xFF62A769)),
+                                      ),
+                                      onPressed: () {
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (context) => Trackpage(
+                                                docid: detaisl.id,
+                                                username: detaisl['nameuser'],
+                                                latitude: detaisl['latitude'],
+                                                logitude: detaisl['longitude'],
+                                                index: index,
+                                                currentuserid:
+                                                    detaisl['currentuserid'],
+                                              ),
+                                            ));
+                                      },
+                                      child: Text(
+                                        "Track",
+                                        style: TextStyle(
+                                            color: Colors.black,
+                                            fontSize: 20,
+                                            letterSpacing: 1),
+                                      ),
+                                    ),
+                                  ),
+                                )
+                              ],
+                            ));
+                      },
+                      itemCount: snapshot.data!.docs.length,
+                    );
+                  }),
             )
           ],
         ),
       ),
     ));
+  }
+   void yourLoginFunction() {
+    NativeNotify.registerIndieID('4');
   }
 }

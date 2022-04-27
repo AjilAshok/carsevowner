@@ -52,8 +52,9 @@ class Registrationpage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     // email.text=control.value?.email??'';
-    ownername.text = control.user?.displayName ?? '';
-    email.text = control.user?.email ?? "";
+    final user = FirebaseAuth.instance.currentUser;
+    ownername.text = user!.displayName ?? '';
+    email.text = user.email ?? "";
     // String apikey="AIzaSyB5bzRmVqr1uZ6Q-ZriIYr7Bj1dtSJZcMw";
     // final inital=LatLng(10.1004,76.3570);
     // PickResult selectedplace;
@@ -201,10 +202,8 @@ class Registrationpage extends StatelessWidget {
                     child: Padding(
                       padding: const EdgeInsets.only(top: 15, left: 12),
                       child: GetBuilder<Ownerservice>(
-                        builder: (controller) => 
-                         Text(
-                           controller.address,
-                          
+                        builder: (controller) => Text(
+                          controller.address,
                           style: TextStyle(color: Colors.white),
                         ),
                       ),
@@ -231,7 +230,8 @@ class Registrationpage extends StatelessWidget {
                             padding: const EdgeInsets.all(10.0),
                             child: Text(
                               controller.dropDownText,
-                              style: TextStyle(color: controller.dropDownTextColor),
+                              style: TextStyle(
+                                  color: controller.dropDownTextColor),
                             ),
                           ),
                           isExpanded: true,
@@ -367,13 +367,11 @@ class Registrationpage extends StatelessWidget {
                       await addowner();
                       yourLoginFunction();
 
-                      if (register == false) {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => Requestwait(),
-                            ));
-                      }
+                      Navigator.pushReplacement(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const Requestwait(),
+                          ));
                     }
                   },
                   child: Text(
@@ -440,16 +438,15 @@ class Registrationpage extends StatelessWidget {
           "proof": ownercontrol.name,
           "chekbox": checkBoxList,
           "register": register,
-          "latitude":ownercontrol.latitude,
-          "longitude":ownercontrol.longitude,
-           "date":DateFormat('dd-MM-yyyy').format(DateTime.now())
+          "latitude": ownercontrol.latitude,
+          "longitude": ownercontrol.longitude,
+          "date": DateTime.now().millisecondsSinceEpoch
         })
         .then((value) => print("Owneradded"))
         .onError((error, stackTrace) => print(error));
   }
-   void yourLoginFunction() {
-    
-    NativeNotify.registerIndieID('4');
-}
 
+  void yourLoginFunction() {
+    NativeNotify.registerIndieID('4');
+  }
 }

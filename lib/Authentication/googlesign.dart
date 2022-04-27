@@ -7,14 +7,13 @@ import 'package:get/get.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 class Googlesign extends StatelessWidget {
-   Googlesign({Key? key}) : super(key: key);
-   final controler=Get.put(Logincontrol());
+  Googlesign({Key? key}) : super(key: key);
+  final controler = Get.put(Logincontrol());
   // final GoogleSignIn _googleSignIn=GoogleSignIn(scopes: ['email']);
   // GoogleSignInAccount?  _user;
 
   @override
   Widget build(BuildContext context) {
-    
     return SafeArea(
         child: Scaffold(
       backgroundColor: Color(0XFF3D433E),
@@ -39,18 +38,13 @@ class Googlesign extends StatelessWidget {
             style: TextStyle(color: Colors.white, fontSize: 30),
           ),
           InkWell(
-            onTap: ()async{
-            
+            onTap: () async {
                controler.login(context);
-             
-
-     
             },
             child: Container(
               decoration: BoxDecoration(
                   color: Color.fromARGB(255, 30, 49, 32),
                   borderRadius: BorderRadius.circular(20)),
-          
               padding: EdgeInsets.only(left: 30, right: 10),
               margin: EdgeInsets.only(top: 40, left: 10, right: 10),
               width: double.maxFinite,
@@ -75,7 +69,6 @@ class Googlesign extends StatelessWidget {
                   )
                 ],
               ),
-          
             ),
           ),
         ],

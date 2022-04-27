@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:carsevowner/report/reportpage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -11,11 +12,13 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 
 // import 'package:flutter_document_picker/flutter_document_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
+import 'package:intl/intl.dart';
 import 'package:open_file/open_file.dart';
 
 UploadTask? task;
 
 class Ownerservice extends GetxController {
+  final user = FirebaseAuth.instance.currentUser;
   String? selected;
   File? selfile;
   String? name;
@@ -23,6 +26,8 @@ class Ownerservice extends GetxController {
   String checkBoxText = 'Select any options!';
   Color checkBoxTextColor = Colors.white;
   String address = "Select the location";
+  DateTimeRange range =
+      DateTimeRange(start: DateTime.now(), end: DateTime.now());
 
   String dropDownText = 'Type';
   Color dropDownTextColor = Colors.white;
@@ -34,12 +39,76 @@ class Ownerservice extends GetxController {
   bool Oilchange = false;
   bool breakdown = false;
   bool carwash = false;
-  double latitude=0;
-  double longitude=0;
+  double latitude = 0;
+  double longitude = 0;
+  var location;
+  // List days = [];
+  int? totalowner;
+  int? totalrevenue;
+  var totalowersss = 0;
+  List allorders = [];
+  List orderslist=[];
+  List username=[];
+  List amount=[];
+  List payment=[];
+
+  var ordercollection;
+
   //
 
   int currentindex = 0;
   final Set<Marker> markers = {};
+  final List<ChartData> chartData = [
+    // ChartData(2010, 35),
+    // ChartData(2011, 28),
+    // ChartData(2012, 34),
+    // ChartData(2013, 32),
+    // ChartData(2014, 40),
+    // ChartData(2015, 28),
+    // ChartData(2017, 34),
+    // ChartData(2018, 32),
+    // ChartData(2019, 40)
+  ];
+
+  @override
+  void onInit() {
+    // TODO: implement onInit
+    super.onInit();
+    addres();
+    details();
+    update();
+  }
+
+  // List getDaysInBetween(DateTime startDate, DateTime endDate) {
+  //   for (int i = 0; i <= endDate.difference(startDate).inDays; i++) {
+  //     days.add(
+  //         DateFormat('dd-MM-yyyy').format(startDate.add(Duration(days: i))));
+  //   }
+  //   print(days);
+
+  //   return days;
+  // }
+
+  getuser(List result) async {
+    // totalowner=0;
+    totalrevenue = 0;
+    // print(result);
+    for (var i = 0; i < result.length; i++) {
+      await FirebaseFirestore.instance
+          .collection('Owner')
+          .where('date', isEqualTo: result[i])
+          .get()
+          .then((value) {
+        totalowersss = value.size;
+        // print(value.size);
+      });
+      update();
+      print(totalowersss);
+    }
+  }
+
+// int ranger=int.parse()
+  final now = DateTime.now();
 
   bottomnavbar(index) {
     currentindex = index;
@@ -138,6 +207,69 @@ class Ownerservice extends GetxController {
     print(address);
     print(latitude);
     print(longitude);
+  }
+
+  addres() async {
+    final userid = FirebaseAuth.instance.currentUser!.uid;
+    FirebaseFirestore.instance
+        .collection('Owner')
+        .doc(userid)
+        .get()
+        .then((value) {
+      location = value.get('location');
+      print(location);
+    });
+  }
+
+  var email;
+  var phonenmber;
+  var ownername;
+  details() async {
+    final userid = FirebaseAuth.instance.currentUser!.uid;
+    FirebaseFirestore.instance
+        .collection('Owner')
+        .doc(userid)
+        .get()
+        .then((value) {
+      email = value.get('email');
+      phonenmber = value.get('phonenumber');
+      ownername = value.get('ownername');
+    });
+    print(email);
+    print(phonenmber);
+  }
+
+  sortOrderCustom(DateTime days) async {
+    // print(user!.uid);
+    allorders.clear();
+    username.clear();
+    amount.clear();
+    payment.clear();
+  
+  orderslist.clear();
+    ordercollection = await FirebaseFirestore.instance
+        .collection('Bills')
+        .orderBy('date')
+        .startAt([days.millisecondsSinceEpoch]).get();
+
+    Iterable allordersday = ordercollection.docs.map((e) => e.data()['userid']);
+    // Iterable orderslist=ordercollection.d
+   Iterable orderslistwork=  ordercollection.docs.map((e) => e.data()['work']);
+   Iterable usernamelist=ordercollection.docs.map((e) => e.data()['username']);
+   Iterable amountlist=ordercollection.docs.map((e) => e.data()['amount']);
+   Iterable paymentlist=ordercollection.docs.map((e) => e.data()['paymentoption']);
+
+   
+
+    allorders = allordersday.toList();
+    orderslist=orderslistwork.toList();
+    username=usernamelist.toList();
+   amount=amountlist.toList();
+   payment=paymentlist.toList();
+
+    // print(ordercollection.docs.map((e) => e.data()['userid']).toList());
+    print(this.allorders);
+    update();
   }
 }
 
